@@ -21,17 +21,29 @@ const products: Product[] = [
   // ...
 ];
 
-function parseQueryParam(param: string | QueryString.ParsedQs | string[] | QueryString.ParsedQs[]): number {
-  return Array.isArray(param) ? parseInt(param[0] as string, 10) : parseInt(param as string, 10);
+// function parseQueryParam(param: string | QueryString.ParsedQs | string[] | QueryString.ParsedQs[]): number {
+//   return Array.isArray(param) ? parseInt(param[0] as string, 10) : parseInt(param as string, 10);
+// }
+
+// function parseQueryParamAsString(param: string | QueryString.ParsedQs | string[] | QueryString.ParsedQs[]): string {
+//   return Array.isArray(param) ? param[0].toString() : param.toString();
+// }
+function parseQueryParam<T>(param: string | QueryString.ParsedQs | string[] | QueryString.ParsedQs[], parseFunction: (value: string) => T): T {
+  if (Array.isArray(param)) {
+    return parseFunction(param[0].toString());
+  } else {
+    return parseFunction(param.toString());
+  }
 }
+
 
 router.get('/products', (req: Request, res: Response) => {
   
   const { page, size, agg_column } = req.query;
 
-  const pageData = parseQueryParam(page);
-  const sizeData = parseQueryParam(size);
-  const aggData = parseQueryParam(agg_column).toString();
+  const pageData = parseQueryParam(page, parseInt);
+  const sizeData = parseQueryParam(size, parseInt);
+  const aggData = parseQueryParam(agg_column, (value) => value);
 
   const { limit, offset } = getPagination(pageData, sizeData);
   const paginatedProducts = products.slice(offset, offset + limit);
@@ -53,13 +65,13 @@ router.get('/products2', (req: Request, res: Response) => {
     return res.status(400).json({ message: 'Page and size parameters are required.' });
   }
 
-  const pageData = parseQueryParam(page);
-  const sizeData = parseQueryParam(size);
-  const aggData = parseQueryParam(agg_column).toString();
+  const pageData = parseQueryParam(page, parseInt);
+  const sizeData = parseQueryParam(size, parseInt);
+  const aggData = parseQueryParam(agg_column, (value) => value);
 
   const { limit, offset } = getPagination(pageData, sizeData);
   const paginatedProducts = products.slice(offset, offset + limit);
-
+  console.log(aggData)
   const response = getPagingData(
     { count: products.length, rows: paginatedProducts },
     pageData,
