@@ -1,12 +1,14 @@
-const express = require('express');
-const compression = require('compression');
-const cookieParser = require('cookie-parser');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const productRoutes = require('./routes/route'); // Import your route files
-
+import express, { Express, Request, Response } from 'express';
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import productRoutes from './routes/route'; // Import your route files
 
 class App {
+    private app: Express;
+    private port: number;
+
     constructor() {
         this.app = express();
         this.port = 3000;
@@ -15,17 +17,17 @@ class App {
         this.initializeRoutes();
     }
 
-    listen() {
+    public listen(): void {
         this.app.listen(this.port, () => {
             console.debug(`🚀 App listening on the port ${this.port}`);
         });
     }
 
-    getServer() {
+    public getServer(): Express {
         return this.app;
     }
 
-    initializeMiddlewares() {
+    private initializeMiddlewares(): void {
         this.app.use(helmet());
         this.app.use(compression());
         this.app.use(express.json());
@@ -33,15 +35,14 @@ class App {
         this.app.use(cookieParser());
     }
 
-    initializeRoutes() {
+    private initializeRoutes(): void {
         // Define your routes here using express.Router()
-        this.app.get('/', (req, res) => {
+        this.app.get('/', (req: Request, res: Response) => {
             res.send('Hello, World!');
         });
 
         this.app.use('/', productRoutes);
-
     }
 }
 
-module.exports = App;
+export default App;

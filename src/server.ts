@@ -1,4 +1,4 @@
-const App = require('./app');
+import App from './app';
 
 const server = new App();
 server.listen();
